@@ -106,6 +106,10 @@ func ApplyJob(c *fiber.Ctx) error {
 	claims := user.Claims.(jwt.MapClaims)
 	talentID := int(claims["id"].(float64))
 
+	if claims["role"] != "talent" {
+		return c.SendStatus(fiber.ErrUnauthorized.Code)
+	}
+
 	_, err := db.DB.Exec("INSERT INTO applications (job_id, talent_id, status) VALUES ($1, $2, $3)", jobID, talentID, "applied")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "cannot apply for job"})
